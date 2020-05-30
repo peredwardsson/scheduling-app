@@ -1,0 +1,3 @@
+[console_scripts]
+schedules = scheduling_app.get_schedule:main
+

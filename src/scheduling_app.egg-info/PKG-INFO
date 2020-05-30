@@ -1,0 +1,11 @@
+Metadata-Version: 1.2
+Name: scheduling-app
+Version: 0.1.0
+Summary: A scheduling app that can be used to generate schedules for people on workplaces.
+Home-page: UNKNOWN
+Author: Per Edwardsson
+Author-email: per@peredwardsson.se
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.8,<4.0

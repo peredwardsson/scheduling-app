@@ -1,11 +1,19 @@
-# src/scheduling_app/get_schedule.py
-import click
 from datetime import datetime
+import os
 
+import click
+
+from scheduling_app.entities import (
+    Schedule,
+    # BusinessRequirements,
+    # RegulatoryRequirements,
+    # Employee,
+)
 from . import __version__
 
-def month_int_to_str(month_idx: int):
-    
+
+def month_int_to_str(month_idx: int) -> str:
+
     switcher = {
         1: "January",
         2: "February",
@@ -18,18 +26,23 @@ def month_int_to_str(month_idx: int):
         9: "September",
         10: "October",
         11: "November",
-        12: "December"
+        12: "December",
     }
     return switcher.get(month_idx, f"ERROR: input {month_idx} not found in switcher")
 
+
 @click.command()
-@click.option("--month", type=int, help="month (1-12) which to generate schedule for")
+@click.option("--month", type=int, help="month (1-12) to generate schedule for")
 @click.version_option(version=__version__)
-def main(month):
+def main(month: int) -> None:
     """A damn fine scheduling app."""
     click.echo("Hello world!")
-    if month == None:
+    click.echo(os.getcwd())
+    if month is None:
         month = datetime.now().month + 1
-    month = month_int_to_str(month)
-    click.echo(f"Picked month {month}")
+    month_str = month_int_to_str(month)
+    click.echo(f"Picked month {month_str}")
 
+
+def generate_base_schedule() -> Schedule:
+    pass

@@ -1,7 +1,11 @@
 [flake8]
-select = B,B9,BLK,C,E,F,W,I,S
+select = ANN,B,B9,BLK,C,E,F,W,I,S
 ignore = E203,W503,E501,BLK100
 max-line-length = 80
 application-import-names = scheduling_app,tests
 import-order-style = google
-per-file-ignores = tests/*:S101
+exclude = .nox/*
+per-file-ignores =
+                    tests/*:S101,ANN
+                    noxfile.py:ANN
+                    entities.py:ANN101

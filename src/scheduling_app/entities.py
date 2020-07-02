@@ -1,7 +1,8 @@
 """Contains entities for scheduling-app."""
 
+import calendar
 from dataclasses import dataclass, field
-from datetime import date, datetime
+import datetime
 from random import randint
 from typing import Any, Dict, List
 
@@ -24,14 +25,14 @@ class Employee:
     name: str
     experience: int
     preferences: list
-    id: int = hash((randint(0, 2e64), datetime.now()))
+    id: int
 
     def __init__(self, name: str, experience: int, preferences: List) -> Any:
         """Returns an Employee with name, experience and perferences."""
         self.name = name
         self.experience = experience
         self.preferences = preferences
-        self.id = hash((randint(0, 2e64), datetime.now()))
+        self.id = hash((randint(0, 2e64), datetime.datetime.now()))
 
     def __hash__(self) -> int:
         """Hash stored in self.id."""
@@ -162,14 +163,15 @@ class Schedule:
     """A schedule for a single day.
 
     Attributes:
-        day: The day of the schedule
+        date: The day of the schedule
         requirements_regulatory: A list of functions for calculating
         regulatory requirements
         requirements_business: An np.array of employment needs per hour
         for a full day.
     """
 
-    day: date = date(2020, 1, 1)
+    date: datetime.date = datetime.date(2020, 1, 1)
+    weekday: str = calendar.day_name[date.weekday()]
     laws: list = field(default_factory=list)
     hours: np.ndarray = field(default_factory=np.ndarray)
     employees: List[Employee] = field(default_factory=list)

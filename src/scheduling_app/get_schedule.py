@@ -56,9 +56,8 @@ def main(month: int) -> None:
     s = Schedule(
         hours=business_hours, laws=[], employees=[p, p2, p3], shifts=workshifts
     )
-    Schedule()
     schedule_employees(s)
-    # print_schedule(s)
+    print_schedule(s)
 
 
 def generate_test_employee(
@@ -80,6 +79,7 @@ def schedule_employees(s: Schedule) -> None:
 def print_schedule(schedule: Schedule) -> None:
     """Prints the given schedule in console."""
     hours = np.linspace(0, 23, num=24)
+    click.echo(f"Schedule for {schedule.weekday}, {schedule.date}.")
     click.echo("-" * 205)
     print("{:<30}".format("## clock"), end="")
     for clock in hours:
@@ -93,11 +93,11 @@ def print_schedule(schedule: Schedule) -> None:
     if schedule.employees is not None:
         for person in schedule.employees:
             print(f"{person.name:<32}", end="")
+            shift = schedule.assignments[person]
             for hour in hours:
                 s = (
                     "####"
-                    if hour >= person.working_hours_start
-                    and hour < person.working_hours_end
+                    if hour >= shift.start_hour.hour and hour < shift.finish_hour.hour
                     else ""
                 )
                 print("{:<6}".format(s), end="")
@@ -106,8 +106,7 @@ def print_schedule(schedule: Schedule) -> None:
 
 def init_workforce() -> Workforce:
     """Initializes a Workforce with three unit employees."""
-    p1 = Employee(name="Person A", experience=1, preferences=[], happiness=1.0)
-    p2 = Employee(name="Person B", experience=1, preferences=[], happiness=1.0)
-    p3 = Employee(name="Person C", experience=1, preferences=[], happiness=1.0)
-    w = Workforce([p1, p2, p3])
-    return w
+    p1 = Employee(name="Person A", experience=1, preferences=[])
+    p2 = Employee(name="Person B", experience=1, preferences=[])
+    p3 = Employee(name="Person C", experience=1, preferences=[])
+    return Workforce([p1, p2, p3])

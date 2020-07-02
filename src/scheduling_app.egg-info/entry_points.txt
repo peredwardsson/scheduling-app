@@ -1,2 +1,3 @@
 [console_scripts]
 scheduling-app = scheduling_app.get_schedule:main
+workshift = scheduling_app.generate_workshifts:generate

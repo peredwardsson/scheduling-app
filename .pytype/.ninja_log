@@ -1,0 +1,7 @@
+# ninja log v5
+1	1473	1593418203998694600	/mnt/f/scheduling_app/.pytype/pyi/noxfile.pyi	45d5d29b540f544b
+1473	2220	1593418204802600200	/mnt/f/scheduling_app/.pytype/pyi/tests/__init__.pyi	e78f1cc478d7a60b
+0	708	1593418264392211400	/mnt/f/scheduling_app/.pytype/pyi/scheduling_app/entities.pyi	6997402ecdc8f8dd
+708	1264	1593418264968190500	/mnt/f/scheduling_app/.pytype/pyi/scheduling_app/__init__.pyi	3983fd8032465c7b
+0	2054	1593418666644834600	/mnt/f/scheduling_app/.pytype/pyi/scheduling_app/get_schedule.pyi	73b0c187fe6322f6
+2054	3645	1593418668370855500	/mnt/f/scheduling_app/.pytype/pyi/tests/test_month.pyi	9fc900c6d8a8f680

@@ -1,19 +1,28 @@
+"""Scheduling app."""
 from datetime import datetime
-import os
+import pickle
+import random
+from typing import List
 
 import click
+import numpy as np
+
 
 from scheduling_app.entities import (
+    Employee,
     Schedule,
-    # BusinessRequirements,
+    Workforce,
     # RegulatoryRequirements,
-    # Employee,
 )
 from . import __version__
 
 
-def month_int_to_str(month_idx: int) -> str:
+MIDADJUST = 2
+FIRSTCOL = 30
 
+
+def month_int_to_str(month_idx: int) -> str:
+    """Converts an integer [1-12] into a string of equivalent month."""
     switcher = {
         1: "January",
         2: "February",
@@ -36,13 +45,69 @@ def month_int_to_str(month_idx: int) -> str:
 @click.version_option(version=__version__)
 def main(month: int) -> None:
     """A damn fine scheduling app."""
-    click.echo("Hello world!")
-    click.echo(os.getcwd())
+    with open("test_data/workshifts.pkl", "rb") as f:
+        workshifts = pickle.load(f)
+    business_hours = np.genfromtxt("test_data/business.csv", delimiter=",")
     if month is None:
         month = datetime.now().month + 1
-    month_str = month_int_to_str(month)
-    click.echo(f"Picked month {month_str}")
+    p = generate_test_employee()
+    p3 = generate_test_employee()
+    p2 = generate_test_employee(name="Person B")
+    s = Schedule(
+        hours=business_hours, laws=[], employees=[p, p2, p3], shifts=workshifts
+    )
+    Schedule()
+    schedule_employees(s)
+    # print_schedule(s)
 
 
-def generate_base_schedule() -> Schedule:
-    pass
+def generate_test_employee(
+    name: str = "Person A", exp: int = 3, pref: List = None, happiness: float = 1.0
+) -> Employee:
+    """Generates an employee for testing purposes."""
+    e = Employee(name=name, experience=exp, preferences=pref)
+    return e
+
+
+def schedule_employees(s: Schedule) -> None:
+    """Schedules all employees according to an optimization algorithm."""
+    assert s.employees, "schedule_employees(): No employees in input schedule."
+    for person in s.employees:
+        shift = random.choice(s.shifts)
+        s.assign(person, shift)
+
+
+def print_schedule(schedule: Schedule) -> None:
+    """Prints the given schedule in console."""
+    hours = np.linspace(0, 23, num=24)
+    click.echo("-" * 205)
+    print("{:<30}".format("## clock"), end="")
+    for clock in hours:
+        print(f"{clock:02n}:00", end=" ")
+    click.echo("")
+    print("{:<30}".format("## need"), end="")
+    for need in schedule.hours:
+        print(f"{need:<6n}", end="")
+    click.echo("")
+    click.echo("-" * 205)
+    if schedule.employees is not None:
+        for person in schedule.employees:
+            print(f"{person.name:<32}", end="")
+            for hour in hours:
+                s = (
+                    "####"
+                    if hour >= person.working_hours_start
+                    and hour < person.working_hours_end
+                    else ""
+                )
+                print("{:<6}".format(s), end="")
+            print("")
+
+
+def init_workforce() -> Workforce:
+    """Initializes a Workforce with three unit employees."""
+    p1 = Employee(name="Person A", experience=1, preferences=[], happiness=1.0)
+    p2 = Employee(name="Person B", experience=1, preferences=[], happiness=1.0)
+    p3 = Employee(name="Person C", experience=1, preferences=[], happiness=1.0)
+    w = Workforce([p1, p2, p3])
+    return w

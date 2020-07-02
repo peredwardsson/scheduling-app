@@ -28,9 +28,12 @@ pytest-mock = "^3.1.0"
 mypy = "^0.770"
 typeguard = "^2.7.1"
 flake8-annotations = "^2.1.0"
+pytype = {version = "^2020.6.26", python = "3.8"}
+flake8-docstrings = "^1.5.0"
 
 [tool.poetry.scripts]
 scheduling-app = "scheduling_app.get_schedule:main"
+workshift = "scheduling_app.generate_workshifts:generate"
 
 [tool.coverage.paths]
 source = ["src"]

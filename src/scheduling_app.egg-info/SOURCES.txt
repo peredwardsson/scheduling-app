@@ -2,6 +2,7 @@ README.md
 setup.py
 src/scheduling_app/__init__.py
 src/scheduling_app/entities.py
+src/scheduling_app/generate_workshifts.py
 src/scheduling_app/get_schedule.py
 src/scheduling_app.egg-info/PKG-INFO
 src/scheduling_app.egg-info/SOURCES.txt

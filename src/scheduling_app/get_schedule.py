@@ -1,7 +1,6 @@
 """Scheduling app."""
 from datetime import datetime
 import pickle
-import random
 from typing import List
 
 import click
@@ -54,7 +53,11 @@ def main(month: int) -> None:
     p3 = generate_test_employee()
     p2 = generate_test_employee(name="Person B")
     s = Schedule(
-        hours=business_hours, laws=[], employees=[p, p2, p3], shifts=workshifts
+        hours=business_hours,
+        laws=[],
+        employees=[p, p2, p3],
+        shifts=workshifts,
+        date=datetime(2020, 1, 3),
     )
     schedule_employees(s)
     print_schedule(s)
@@ -72,7 +75,7 @@ def schedule_employees(s: Schedule) -> None:
     """Schedules all employees according to an optimization algorithm."""
     assert s.employees, "schedule_employees(): No employees in input schedule."
     for person in s.employees:
-        shift = random.choice(s.shifts)
+        shift = s.shifts[-1]
         s.assign(person, shift)
 
 

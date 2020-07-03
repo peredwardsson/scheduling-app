@@ -4,7 +4,7 @@ import calendar
 from dataclasses import dataclass, field
 import datetime
 from random import randint
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
@@ -45,7 +45,6 @@ class Workforce:
 
     Attributes:
     - employees(list): Contains a list of employees.
-
     """
 
     employees: List[Employee]
@@ -59,13 +58,6 @@ class Workforce:
 
 
 @dataclass
-class Calendar:
-    """Class that holds a schedule for each day."""
-
-    pass
-
-
-@dataclass
 class RegulatoryRequirements:
     """Holds regulatory requirements in a list."""
 
@@ -73,7 +65,7 @@ class RegulatoryRequirements:
 
 
 @dataclass
-class Time_base:
+class Time:
     """A class that holds a time.
 
     Attributes:
@@ -92,12 +84,7 @@ class Time_base:
         s = f"{self.hour:02d}:{self.minute:02d}"
         return s
 
-
-@dataclass
-class Time(Time_base):
-    """Class that performs time calculations."""
-
-    def add(self, time: Time_base) -> Time_base:
+    def add(self, time: "Time") -> "Time":
         """Adds the time to the object."""
         dm = self.minute + time.minute
         dt = self.hour + time.hour
@@ -111,7 +98,7 @@ class Time(Time_base):
         return self
 
     @staticmethod
-    def delta(time: Time_base, time2: Time_base) -> Time_base:
+    def delta(time: "Time", time2: "Time") -> "Time":
         """Calculates the time between time and time2."""
         dt = time2.hour - time.hour
         dm = time2.minute - time.minute
@@ -123,39 +110,65 @@ class Time(Time_base):
             return T
         return Time(dt, dm)
 
-    def __repr__(self) -> str:
-        """Returns the superclass __repr__."""
-        return super().__repr__()
-
 
 @dataclass
-class Workshift_base:
-    """An approved workshift that can be scheduled to employees."""
+class Workshift:
+    """An approved workshift that can be scheduled to employees.
+
+    Attributes:
+    - name(str): Name of the workshift
+    - start_hour(Time): Starting time of shift
+    - finish_hour(Time): Finishing time of shift
+    - days(List[int]): List of weekdays at which shift is applicable
+    - alternative_schedule(List[Workshift]): Optional, if some days require different
+      workshifts, these can be added here.
+    """
 
     name: str
     start_hour: Time
     finish_hour: Time
     days: List[int] = field(default_factory=list)
 
+    alternative_schedule: List["Workshift"] = field(default_factory=list)
 
-@dataclass
-class Workshift(Workshift_base):
-    """An approved workshift that can be scheduled to employees."""
+    @property
+    def time_tuple(self) -> Tuple[Time, Time]:
+        """Returns a tuple containing start and finishing hours."""
+        return (self.start_hour, self.finish_hour)
 
-    alternative_schedule: List[Workshift_base] = field(default_factory=list)
+    @property
+    def overnight(self) -> bool:
+        """Returns a bool indicating whether this shift runs overnight."""
+        return self.finish_hour.hour < self.start_hour.hour
 
-    def shift_length(self) -> Time_base:
+    @property
+    def overnight_pre(self) -> Tuple[Time, Time]:
+        """Returns the first part of an overnight shift if overnight."""
+        if self.overnight:
+            return (self.start_hour, Time(23, 59))
+        else:
+            return self.time_tuple
+
+    @property
+    def overnight_post(self) -> Tuple[Time, Time]:
+        """Returns the second part of an overnight shift if overnight."""
+        if self.overnight:
+            return (Time(0, 0), self.finish_hour)
+        else:
+            return self.time_tuple
+
+    def shift_length(self) -> Time:
         """Returns the length of the shift."""
         return Time.delta(self.start_hour, self.finish_hour)
 
-    def add_alternative_schedule(self, shift: Workshift_base) -> None:
+    def add_alternative_schedule(self, altshift: "Workshift") -> None:
         """Appends an alternative schedule if the shift is laid on a specific day."""
-        if bool(self.days) and all(x not in self.days for x in shift.days):
+        if bool(self.days) and all(x not in self.days for x in altshift.days):
             raise AssertionError(
                 "Alternative schedule needs to be defined \
                 for a weekday that the workshift is valid."
             )
-        self.alternative_schedule.append(shift)
+        self.alternative_schedule.append(altshift)
 
 
 @dataclass
@@ -171,15 +184,37 @@ class Schedule:
     """
 
     date: datetime.date = datetime.date(2020, 1, 1)
-    weekday: str = calendar.day_name[date.weekday()]
     laws: list = field(default_factory=list)
     hours: np.ndarray = field(default_factory=np.ndarray)
     employees: List[Employee] = field(default_factory=list)
     shifts: List[Workshift] = field(default_factory=list)
     assignments: Dict[Employee, Workshift] = field(default_factory=dict)
 
+    @property
+    def weekday(self) -> str:
+        """Returns the weekday of the schedule as a string."""
+        return calendar.day_name[self.date.weekday()]
+
     def assign_employee_to_shift(self, employee: Employee, shift: Workshift) -> None:
         """Assigns a Workshift to an Employee and adds a record to the Schedule."""
+        if shift.alternative_schedule is not None:
+            for altshift in shift.alternative_schedule:
+                if self.date.weekday in altshift.days:
+                    shift = altshift
+
         self.assignments[employee] = shift
 
     assign = assign_employee_to_shift
+
+
+@dataclass
+class Calendar:
+    """Class that holds a schedule for each day."""
+
+    daybyday: Dict[datetime.date, Schedule]
+
+    def assign_employee_to_shift(
+        self, date: datetime.date, employee: Employee, shift: Workshift
+    ) -> None:
+        """Assigns shift to employee on the date supplied."""
+        self.daybyday[date].assign(employee, shift)
